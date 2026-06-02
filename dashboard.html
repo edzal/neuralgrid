@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NeuralGrid — Control Center</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dashboard-page">
+  <div class="grid-bg"></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
+        <polygon points="20,2 38,32 2,32" stroke="currentColor" stroke-width="3" fill="none"/>
+        <circle cx="20" cy="20" r="3" fill="currentColor"/>
+      </svg>
+      <span class="brand-text">NEURALGRID</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item active" onclick="switchSection('live', this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg>
+        Live Monitor
+      </a>
+      <a class="nav-item" onclick="switchSection('analytics', this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+        Analytics Logs
+      </a>
+      <a class="nav-item" onclick="switchSection('alerts', this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        Alerts Desk
+        <span class="badge" id="sidebarAlertCount">1</span>
+      </a>
+      <a class="nav-item" onclick="switchSection('config', this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M6.34 17.66l-1.41 1.41M20 12h-2M6 12H4M12 20v-2M12 6V4"/></svg>
+        Hardware Config
+      </a>
+    </nav>
+
+    <div class="theme-toggle-wrap">
+      <button class="theme-btn" onclick="toggleTheme()">
+        🌗 TOGGLE VIEW MODE
+      </button>
+    </div>
+
+   <!-- Unified Operator Profile Workspace -->
+    <div class="sidebar-footer">
+      <div class="operator-badge">
+        <div class="op-avatar" style="background: var(--text); color: var(--surface);">DO</div>
+        <div class="op-info">
+          <span class="op-name" style="font-weight: 700; letter-spacing: 0.03em;">Desk Officer</span>
+          <span class="op-role mono" style="font-size: 0.6rem; color: var(--muted);">GESCOM_MAIN_STATION</span>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="logout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="dash-header">
+      <div class="header-left">
+        <h2 class="page-title" id="sectionTitle">Live Monitor</h2>
+        <span class="mono live-tag" id="sectionTag"><span class="pulse-dot"></span> FEEDER SUBSYSTEM</span>
+      </div>
+      <div class="header-right">
+        <div class="header-time mono" id="headerTime">--:--:--</div>
+        <div class="threshold-control" id="globalThresholdPanel">
+          <label class="mono">CRITICAL THRESHOLD</label>
+          <input type="range" min="5" max="30" value="15" id="thresholdSlider" oninput="updateThreshold(this.value)"/>
+          <span class="mono" id="thresholdVal">15%</span>
+        </div>
+      </div>
+    </header>
+
+    <section id="section-live" class="content-section active-section">
+      <div class="alert-banner" id="alertBanner">
+        <div class="alert-text">
+          <strong>⚡ THEFT CRITICAL INCIDENT FLAGGED</strong>
+          <span class="mono" id="alertDetail">Mismatch delta reading exceeds strict parameter at Grid Line Node B-12</span>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card highlight-card">
+          <div class="stat-label">TRANSFORMER TOTAL OUTPUT (SCT-013 A)</div>
+          <div class="stat-value" id="statTransformer">--.-<span>A</span></div>
+          <div class="stat-sub mono">Line Feeder Probe 01</div>
+        </div>
+        <div class="stat-card highlight-card">
+          <div class="stat-label">SUMMATED CONSUMER LOAD (SCT-013 B)</div>
+          <div class="stat-value" id="statMeter">--.-<span>A</span></div>
+          <div class="stat-sub mono">Terminal Pole Probe 02</div>
+        </div>
+        <div class="stat-card highlight-card" id="mismatchCard">
+          <div class="stat-label">CALCULATED COMPARATOR MISMATCH</div>
+          <div class="stat-value" id="statMismatch">--%</div>
+          <div class="stat-sub mono" id="mismatchStatus">Analyzing inputs...</div>
+        </div>
+        <div class="stat-card highlight-card">
+          <div class="stat-label">SHIFT MISMATCH EVENTS RECORDED</div>
+          <div class="stat-value" id="statEvents">0<span>flags</span></div>
+          <div class="stat-sub mono">Active validation tracking</div>
+        </div>
+      </div>
+
+      <div class="chart-panel">
+        <div class="panel-header">
+          <span>Real-Time Comparator Current Matrix</span>
+          <span class="mono" style="font-size:0.7rem; color: var(--muted)">Dual CT Differential Bus Execution Loop</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="liveChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-panel">
+        <div class="panel-header">NeuralGrid Architectural Path Execution</div>
+        <div class="flow-diagram">
+          <div class="flow-node active-node">
+            <div class="flow-icon">⚡</div>
+            <div class="flow-label">SCT-013 #1</div>
+            <div class="flow-sub">Transformer CT</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node active-node">
+            <div class="flow-icon">🔌</div>
+            <div class="flow-label">SCT-013 #2</div>
+            <div class="flow-sub">Consumer Line CT</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node active-node">
+            <div class="flow-icon">📟</div>
+            <div class="flow-label">ESP32 Core</div>
+            <div class="flow-sub">ADC Mismatch Calc</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node active-node">
+            <div class="flow-icon">☁</div>
+            <div class="flow-label">ThingSpeak</div>
+            <div class="flow-sub">Data Pipeline MQTT</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node active-node">
+            <div class="flow-icon">🖥</div>
+            <div class="flow-label">Utility Console</div>
+            <div class="flow-sub">Active Client Instance</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="section-analytics" class="content-section">
+      <div class="chart-panel">
+        <div class="panel-header">
+          <span>Historical Theft Metrics — Regional Data Log</span>
+          <span class="mono" style="font-size:0.7rem; color:var(--muted)">GESCOM Grid Zone Summary</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="monthlyChart"></canvas>
+        </div>
+      </div>
+
+      <div class="two-col-grid">
+        <div class="chart-panel">
+          <div class="panel-header">High-Risk Grid Feeder Zones</div>
+          <div class="chart-wrap" style="height:240px">
+            <canvas id="zoneChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-panel">
+          <div class="panel-header">Recent System Incident Log</div>
+          <div class="incident-table" id="incidentLogTable">
+            <div class="table-row table-head">
+              <span>TIMESTAMP</span><span>ZONE</span><span>MISMATCH</span><span>STATUS</span>
+            </div>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="section-alerts" class="content-section">
+      <div class="two-col-grid">
+        <div class="chart-panel">
+          <div class="panel-header">Active Field Interdiction Management</div>
+          <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1rem;">
+            When a mismatch threshold exceeds 15%, the local ESP32 triggers the on-site auditory alert and changes the line state. Real-time alerts are routed here for immediate administrative actions.
+          </p>
+          <div class="incident-table" id="activeAlertsDeskLog">
+            </div>
+        </div>
+
+        <div class="chart-panel">
+          <div class="panel-header">Simulate Grid Theft Event For Evaluation</div>
+          <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1rem;">
+            Click below to instantly trigger a manual line tap theft simulation. This demonstrates exactly how the ESP32 hardware loop communicates a mismatch immediately across the network.
+          </p>
+          <button class="config-btn" style="background: var(--danger);" onclick="forceTheftSimulation()">
+            💥 TRIGGER SIMULATED LINE TAP THEFT
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="section-config" class="content-section">
+      <div class="config-container">
+        <div class="chart-panel">
+          <div class="panel-header">ESP32 Pinout & API Parameters</div>
+          <div class="config-form" onsubmit="return false;">
+            <div class="form-group">
+              <label>ThingSpeak Channel Write API Key</label>
+              <input type="text" value="TS_REDACTED_KV719X" disabled />
+            </div>
+            <div class="form-group">
+              <label>SCT-013 Transformer Sensor Pin (ADC0)</label>
+              <select><option>GPIO 34 (Analog In)</option></select>
+            </div>
+            <div class="form-group">
+              <label>SCT-013 Consumer Sensor Pin (ADC1)</label>
+              <select><option>GPIO 35 (Analog In)</option></select>
+            </div>
+            <div class="form-group">
+              <label>Buzzer / Warning LED Output Relay</label>
+              <select><option>GPIO 25 (Digital Out)</option></select>
+            </div>
+            <button class="config-btn" onclick="showToast('Parameters synced down to mock non-volatile flash space')">
+              SAVE HARDWARE PARAMETERS
+            </button>
+          </div>
+        </div>
+
+        <div class="chart-panel">
+          <div class="panel-header">ESP32 Serial Monitor Bus Output (\dev\ttyUSB0)</div>
+          <div class="terminal-box" id="hardwareTerminalLog">
+            <div class="term-ln">[SYSTEM Init] Initializing NeuralGrid Microarchitecture Stack...</div>
+            <div class="term-ln">[SYSTEM Init] Initializing WiFi Interface Layer: Connected to SIT_Lab_Grid</div>
+            <div class="term-ln">[SYSTEM Init] API Connection Pool Verification to ThingSpeak Core: Status 200 OK</div>
+            <div class="term-ln">[HARDWARE] SCT-013 Interfacing Calibration Multipliers set: 30A/1V scaling ratio</div>
+            <div class="term-ln term-success">[RUNNING] Microcontroller pipeline executing dynamic comparator calculations...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
