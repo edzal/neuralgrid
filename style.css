@@ -297,7 +297,7 @@ body {
 @media(max-width: 768px) { .two-col-grid { grid-template-columns: 1fr; } }
 
 .incident-table { display: flex; flex-direction: column; gap: 0.25rem; }
-.table-row { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 0.5rem; padding: 0.5rem; border-radius: 4px; font-size: 0.75rem; align-items: center; }
+.table-row { display: grid; grid-template-columns: 1.2fr 1.8fr 1fr 1fr; gap: 0.5rem; padding: 0.5rem; border-radius: 4px; font-size: 0.75rem; align-items: center; }
 .table-row:nth-child(even) { background: var(--surface-2); }
 .table-head { color: var(--muted); font-weight: bold; border-bottom: 1px solid var(--border); }
 .danger-text { color: var(--danger); font-weight: bold; }
@@ -305,6 +305,29 @@ body {
 
 .badge-danger { font-size: 0.6rem; background: var(--danger-dim); color: var(--danger); border: 1px solid var(--danger); padding: 0.15rem 0.35rem; border-radius: 4px; font-weight: bold; }
 .badge-safe { font-size: 0.6rem; background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent); padding: 0.15rem 0.35rem; border-radius: 4px; font-weight: bold; }
+
+/* GEOGRAPHIC ALERTS DESK PANELS */
+.alert-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+[data-theme="dark"] .alert-card {
+  background: var(--surface-2) !important;
+  color: var(--text) !important;
+}
+[data-theme="dark"] .alert-card.critical {
+  background: rgba(255, 71, 87, 0.04) !important;
+  border-left-color: var(--danger) !important;
+}
+[data-theme="dark"] .alert-card strong, 
+[data-theme="dark"] .alert-card p strong {
+  color: var(--text) !important;
+}
+[data-theme="dark"] .alert-card div[style*="color: #333"] {
+  color: var(--text-dim) !important;
+}
 
 /* CONFIGURATION & MOCK PANELS */
 .config-container { display: grid; grid-template-columns: 1fr 1.5fr; gap: 1.5rem; }
@@ -319,6 +342,10 @@ body {
 }
 .config-btn {
   padding: 0.75rem; background: var(--accent); color: #fff; border: none; font-weight: 700; border-radius: 4px; cursor: pointer;
+  transition: background 0.2s;
+}
+.config-btn:hover {
+  filter: brightness(1.1);
 }
 
 .terminal-box {
